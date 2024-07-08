@@ -1,26 +1,23 @@
 <template>
-	<p>Total Time: {{ displayTime() }}</p>
+	<p>Total Time: {{ formatedTimes }}</p>
 	<div style="display: flex; justify-content: space-around;">
 	  <div>
 		<label for="minutes">Minutes:</label>
-		<input list="minutesOptions" v-model="selectedMinutes" id="minutes" @input="calculateTime()">
-		<datalist id="minutesOptions">
-		  <option v-for="min in minutesOptions" :key="min" :value="min">{{ min }}</option>
-		</datalist>
+		<select value="value" @change="handleChange($event.target.value, 0, true)">
+        <option v-for="num in 60" :value="num">{{ num }}</option>
+    </select>
 	  </div>
 	  <div>
 		<label for="hours">Hours:</label>
-		<input list="hoursOptions" v-model="selectedHours" id="hours" @input="calculateTime()">
-		<datalist id="hoursOptions">
-		  <option v-for="hour in hoursOptions" :key="hour" :value="hour">{{ hour }}</option>
-		</datalist>
+		<select value="selectedHours" @change="handleChange($event.target.value, 1, true)">
+		<option v-for="num in 23" :value="num">{{ num }}</option>
+	</select>
 	  </div>
 	  <div>
 		<label for="days">Days:</label>
-		<input list="daysOptions" v-model="selectedDays" id="days" @input="calculateTime()">
-		<datalist id="daysOptions">
-		  <option v-for="day in daysOptions" :key="day" :value="day">{{ day }}</option>
-		</datalist>
+		<select value="selectedDays" @change="handleChange($event.target.value, 2, true)">
+		<option v-for="num in 23" :value="num">{{ num }}</option>
+	</select>
 	  </div>
 	</div>
 	<button @click="addTimeAndClearSelections">Add Time and Clear Selections</button>
@@ -28,19 +25,36 @@
 
 <script>
 export default {
+	props: {
+		value: {
+			type: Array,
+			default: ["0"],
+		}
+	},
   data() {
     return {
       selectedMinutes: null,
       selectedHours: null,
       selectedDays: null,
-      minutesOptions: [0, 1, 5, 10, 15, 30, 60],
-      hoursOptions: [...Array(24).keys()].map(hour => hour.toString()),
-      daysOptions: [...Array(14).keys()].map(day => day.toString()), // Convert to strings
       totalTime: 0,
 	  tempString: "",
-	  formatedTimes: [],
+	  formatedTimes: "",
 	  updatedProps: [],
     };
+  },
+  emits: ['input'],
+	setup(props, { emit }) {
+		return { handleChange };
+
+		function handleChange(value, index, update) {
+			if (update == true) {
+				if (props.value === null) {
+					props.value = [];
+				}
+				props.value[index] = value;
+			}
+			emit('input', props.value);
+		}
   },
   methods: {
 	displayTime() {
@@ -60,26 +74,35 @@ export default {
 	},
 	calculateTime() {
 		var totalTime = 0;
-		if (parseFloat(this.selectedDays) !== NaN && this.selectedDays !== null) {
-			totalTime += parseFloat(this.selectedDays) * 24;
+		console.log(parseFloat(this.$props.value[0]));
+		if (parseFloat(this.$props.value[0]) !== null) {
+			totalTime += parseFloat(this.$props.value[0]) / 60;
+			console.log(this.$props.value[0]);
 		}
-		if (parseFloat(this.selectedHours) !== NaN && this.selectedHours !== null) {
-			totalTime += parseFloat(this.selectedHours);
+		if (parseFloat(this.$props.value[1]) !== null) {
+			totalTime += parseFloat(this.$props.value[1]);
+			console.log(this.$props.value[1]);
 		}
-		if (parseFloat(this.selectedMinutes) !== NaN && this.selectedMinutes !== null) {
-			totalTime += parseFloat(this.selectedMinutes) / 60;
+		console.log(totalTime);
+		if (parseFloat(this.$props.value[2]) !== null) {
+			totalTime += parseFloat(this.$props.value[2]) * 24;
+			console.log(this.$props.value[2]);
 		}
 		if (totalTime === 0) {
+			console.log(":(");
 			return "0";
 		}
+		console.log(totalTime);
 		return convertTime(totalTime);
 		
 	},
 	addTimeAndClearSelections() {
-        this.formatedTimes.push(this.calculateTime());
+        this.formatedTimes = this.calculateTime();
+
         this.selectedMinutes = null;
         this.selectedHours = null;
         this.selectedDays = null;
+		//this.value = null;
 		
     }
   },
@@ -97,7 +120,7 @@ function convertTime(timeToConvert) {
 	if (timeToConvert >= 48) {
 		dayFlag = true;
 		returnString = Math.floor(timeToConvert/24) + " days";
-		timeToConvert = timeToConvert % 24; // remove .floor() if minutes are wanted WITH DAYS
+		timeToConvert = timeToConvert % 24; // add .floor() if minutes arent wanted WITH DAYS
 		if (timeToConvert > 0) { // Adds space if days AND hours
 			returnString += " ";
 		}
