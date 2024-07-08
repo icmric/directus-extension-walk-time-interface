@@ -3,21 +3,21 @@
 	<div style="display: flex; justify-content: space-around;">
 	  <div>
 		<label for="minutes">Minutes:</label>
-		<input list="minutesOptions" v-model="inputMinutes" id="minutes" @input="calculateTime()">
+		<input list="minutesOptions" v-model="selectedMinutes" id="minutes" @input="calculateTime()">
 		<datalist id="minutesOptions">
 		  <option v-for="min in minutesOptions" :key="min" :value="min">{{ min }}</option>
 		</datalist>
 	  </div>
 	  <div>
 		<label for="hours">Hours:</label>
-		<input list="hoursOptions" v-model="inputHours" id="hours" @input="calculateTime()">
+		<input list="hoursOptions" v-model="selectedHours" id="hours" @input="calculateTime()">
 		<datalist id="hoursOptions">
 		  <option v-for="hour in hoursOptions" :key="hour" :value="hour">{{ hour }}</option>
 		</datalist>
 	  </div>
 	  <div>
 		<label for="days">Days:</label>
-		<input list="daysOptions" v-model="inputDays" id="days" @input="calculateTime()">
+		<input list="daysOptions" v-model="selectedDays" id="days" @input="calculateTime()">
 		<datalist id="daysOptions">
 		  <option v-for="day in daysOptions" :key="day" :value="day">{{ day }}</option>
 		</datalist>
@@ -30,9 +30,9 @@
 export default {
   data() {
     return {
-      //selectedMinutes: null,
-      //selectedHours: null,
-      //selectedDays: null,
+      selectedMinutes: null,
+      selectedHours: null,
+      selectedDays: null,
       minutesOptions: [0, 1, 5, 10, 15, 30, 60],
       hoursOptions: [...Array(24).keys()].map(hour => hour.toString()),
       daysOptions: [...Array(14).keys()].map(day => day.toString()), // Convert to strings
@@ -42,12 +42,6 @@ export default {
 	  updatedProps: [],
     };
   },
-	setup(props) {
-		function handleChange(value) {
-			tempString = props.value;
-		}
-		return handleChange
-	},
   methods: {
 	displayTime() {
 		var returnTimeString = "";
