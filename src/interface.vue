@@ -21,6 +21,7 @@
 	  </div>
 	</div>
 	<button @click="addTime">Add Time</button>
+	<button @click="reset">Reset</button>
   </template>
 
 <script>
@@ -36,7 +37,6 @@ export default {
       selectedMinutes: null,
       selectedHours: null,
       selectedDays: null,
-	  formatedTimes: [],
 	  draggedTile: null,
 	  localHoursArray: [],
     };
@@ -54,15 +54,13 @@ export default {
 	},
 	displayTime() {
 		// loads, calculates and renders values when a save is loaded
-		if (this.localHoursArray.length == 0 && this.$props.value != null) { 
+		if (this.localHoursArray.length == 0 && this.$props.value != null) {
 			this.localHoursArray = []; 
 			Object.values(this.$props.value).forEach(element => {
 				this.localHoursArray.push(element);
-				this.formatedTimes.push(convertTime(element));
 			})
+			this.localHoursArray.sort((a,b) => a - b); 
 		}
-		//this.formatedTimes = [];
-		this.localHoursArray.sort((a,b) => a - b); 
 
 		var returnTimeString = "";
 			for (var i = 0; i < this.localHoursArray.length; i++) { // Loops over times and converts them to updated format
@@ -92,6 +90,7 @@ export default {
 			return "0";
 		}
 		this.localHoursArray.push(totalTime);
+		this.localHoursArray.sort((a,b) => a - b); 
 		return totalTime;
 		
 	},
@@ -107,6 +106,12 @@ export default {
 		this.selectedHours = null;
 		this.selectedDays = null;
 	},
+	reset() {
+		this.clearSelections();
+		this.localHoursArray = [0];
+		this.$emit('input', null);
+		this.localHoursArray = [];
+	}
   },
 };
 
