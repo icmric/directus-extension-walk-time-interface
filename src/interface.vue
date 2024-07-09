@@ -1,28 +1,18 @@
 <template>
 	<p>Total Time: {{ displayTime() }}</p>
-	<div style="display: flex; justify-content: space-around;">
-	  <div>
-		<label for="minutes">Minutes:</label>
-		<select :value="selectedMinutes" @change="handleChange($event.target.value, 0, true)">
-        <option v-for="num in 60" :value="num">{{ num }}</option>
-    </select>
-	  </div>
-	  <div>
-		<label for="hours">Hours:</label>
-		<select :value="selectedHours" @change="handleChange($event.target.value, 1, true)">
-		<option v-for="num in 23" :value="num">{{ num }}</option>
-	</select>
-	  </div>
-	  <div>
-		<label for="days">Days:</label>
-		<select value="selectedDays" @change="handleChange($event.target.value, 2, true)">
-		<option v-for="num in 23" :value="num">{{ num }}</option>
-	</select>
-	  </div>
-	</div>
-	<button @click="addTime">Add Time</button>
-	<button @click="reset">Reset</button>
-  </template>
+	<form class="time-form">
+        <input v-model="selectedDays" type="number" id="days" name="days" min="0" required><label for="days">Days</label>
+
+        <input v-model="selectedHours" type="number" id="hrs" name="hrs" min="0" max="24" required>
+       <label for="hrs">Hrs</label>
+
+        <input v-model="selectedMinutes" type="number" id="mins" name="mins" min="0" max="60" required>
+        <label for="mins">Mins</label>
+
+        <button type="submit" @click="addTime">Add</button>
+		<button type="reset" @click="reset">Reset</button>
+    </form>
+</template>
 
 <script>
 export default {
@@ -97,7 +87,7 @@ export default {
 	addTime() {
         this.calculateTime();
 		var json = { ...this.localHoursArray };
-		this.$emit('input', json);
+		this.$emit('input', this.localHoursArray);
         this.clearSelections();
 		
     },
@@ -165,3 +155,42 @@ function convertTime(timeToConvert) {
 	return returnString;
 }
 </script>
+
+<style>
+.time-form {
+			flex-direction: row;
+			display: flex;
+            align-items: center;
+         padding: 10px;
+        }
+        .time-form input[type="number"] {
+            width: 40px;
+          text-align: right;
+        }
+        .time-form label {
+            margin-left: 2px;
+            margin-right: 10px;
+        }
+        .time-form button[type="submit"] {
+            background-color: green;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        .time-form button[type="submit"]:hover {
+            background-color: darkgreen;
+        }
+		.time-form button[type="reset"] {
+			background-color: rgba(255, 0, 0, 0.85);
+			color: white;
+			padding: 8px 12px;
+			border: none;
+			cursor: pointer;
+			border-radius: 6px;
+		}
+		.time-form button[type="reset"]:hover {
+			background-color: darkred;
+		}
+</style>
