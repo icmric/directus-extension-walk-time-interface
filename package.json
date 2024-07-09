@@ -26,5 +26,8 @@
 	"devDependencies": {
 		"@directus/extensions-sdk": "11.0.9",
 		"vue": "^3.4.31"
+	},
+	"dependencies": {
+		"vuedraggable": "^2.24.3"
 	}
 }

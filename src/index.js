@@ -7,5 +7,5 @@ export default {
 	description: 'This is my custom interface!',
 	component: InterfaceComponent,
 	options: null,
-	types: ['string'],
+	types: ['json'],
 };

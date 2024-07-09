@@ -1,15 +1,15 @@
 <template>
-	<p>Total Time: {{ formatedTimes }}</p>
+	<p>Total Time: {{ displayTime() }}</p>
 	<div style="display: flex; justify-content: space-around;">
 	  <div>
 		<label for="minutes">Minutes:</label>
-		<select value="value" @change="handleChange($event.target.value, 0, true)">
+		<select :value="selectedMinutes" @change="handleChange($event.target.value, 0, true)">
         <option v-for="num in 60" :value="num">{{ num }}</option>
     </select>
 	  </div>
 	  <div>
 		<label for="hours">Hours:</label>
-		<select value="selectedHours" @change="handleChange($event.target.value, 1, true)">
+		<select :value="selectedHours" @change="handleChange($event.target.value, 1, true)">
 		<option v-for="num in 23" :value="num">{{ num }}</option>
 	</select>
 	  </div>
@@ -20,7 +20,7 @@
 	</select>
 	  </div>
 	</div>
-	<button @click="addTimeAndClearSelections">Add Time and Clear Selections</button>
+	<button @click="addTime">Add Time</button>
   </template>
 
 <script>
@@ -36,84 +36,81 @@ export default {
       selectedMinutes: null,
       selectedHours: null,
       selectedDays: null,
-      totalTime: 0,
-	  tempString: "",
-	  formatedTimes: "",
-	  updatedProps: [],
+	  formatedTimes: [],
+	  draggedTile: null,
+	  localHoursArray: [],
     };
   },
   emits: ['input'],
-	setup(props, { emit }) {
-		return { handleChange };
-
-		function handleChange(value, index, update) {
-			if (update == true) {
-				if (props.value === null) {
-					props.value = [];
-				}
-				props.value[index] = value;
-			}
-			emit('input', props.value);
-		}
-  },
   methods: {
+	handleChange(value, index) {
+		if (index == 0) {
+			this.selectedMinutes = value;
+		} else if (index == 1) {
+			this.selectedHours = value;
+		} else if (index == 2) {
+			this.selectedDays = value;
+		}
+	},
 	displayTime() {
+		// loads, calculates and renders values when a save is loaded
+		if (this.localHoursArray.length == 0 && this.$props.value != null) { 
+			this.localHoursArray = []; 
+			Object.values(this.$props.value).forEach(element => {
+				this.localHoursArray.push(element);
+				this.formatedTimes.push(convertTime(element));
+			})
+		}
+		//this.formatedTimes = [];
+		this.localHoursArray.sort((a,b) => a - b); 
+
 		var returnTimeString = "";
-			for (var i = 0; i < this.formatedTimes.length; i++) { // Loops over times and converts them to updated format
-				if (i == this.formatedTimes.length - 1 && this.formatedTimes.length > 1) { // Adds "to" between 2nd and 3rd time
+			for (var i = 0; i < this.localHoursArray.length; i++) { // Loops over times and converts them to updated format
+				if (i == this.localHoursArray.length - 1 && this.localHoursArray.length > 1) { // Adds "to" between 2nd and 3rd time
 					returnTimeString += " to ";
+				} else if (this.localHoursArray.length > 2 && i != 0) {
+					returnTimeString += ", "; // Adds ", " between 1st and 2nd time
 				}
- 				
-				returnTimeString += this.formatedTimes[i]; // Converts time to updated format
 				
-				if (i != this.formatedTimes.length - 1 && this.formatedTimes.length > 2) { // Adds ", " between 1st and 2nd time
-					returnTimeString += ", ";
-				}
+				returnTimeString += convertTime(this.localHoursArray[i]); // Converts time to updated format
 			}
 		return returnTimeString;
+		
 	},
 	calculateTime() {
 		var totalTime = 0;
-		console.log(parseFloat(this.$props.value[0]));
-		if (parseFloat(this.$props.value[0]) !== null) {
-			totalTime += parseFloat(this.$props.value[0]) / 60;
-			console.log(this.$props.value[0]);
+		if (this.selectedMinutes != null) {
+			totalTime += parseFloat(this.selectedMinutes) / 60;
 		}
-		if (parseFloat(this.$props.value[1]) !== null) {
-			totalTime += parseFloat(this.$props.value[1]);
-			console.log(this.$props.value[1]);
+		if (this.selectedHours != null) {
+			totalTime += parseFloat(this.selectedHours);
 		}
-		console.log(totalTime);
-		if (parseFloat(this.$props.value[2]) !== null) {
-			totalTime += parseFloat(this.$props.value[2]) * 24;
-			console.log(this.$props.value[2]);
+		if (this.selectedDays != null) {
+			totalTime += parseFloat(this.selectedDays) * 24;
 		}
-		if (totalTime === 0) {
-			console.log(":(");
+		if (totalTime == 0) {
 			return "0";
 		}
-		console.log(totalTime);
-		return convertTime(totalTime);
+		this.localHoursArray.push(totalTime);
+		return totalTime;
 		
 	},
-	addTimeAndClearSelections() {
-        this.formatedTimes = this.calculateTime();
-
-        this.selectedMinutes = null;
-        this.selectedHours = null;
-        this.selectedDays = null;
-		//this.value = null;
+	addTime() {
+        this.calculateTime();
+		var json = { ...this.localHoursArray };
+		this.$emit('input', json);
+        this.clearSelections();
 		
-    }
+    },
+	clearSelections() {
+		this.selectedMinutes = null;
+		this.selectedHours = null;
+		this.selectedDays = null;
+	},
   },
 };
 
 function convertTime(timeToConvert) {
-	
-	//if (isNaN(timeToConvert)) {
-	//	return "Invalid Input";
-	//}
-
 	var returnString = "";
 	var dayFlag = false;
 	// Days
